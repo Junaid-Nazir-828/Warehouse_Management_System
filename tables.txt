@@ -1,0 +1,6 @@
+Customer (customer_id[int],customer_name[str],date[date])
+Defined_Products (product_id[int],product_name[str],raw_materials[blob])
+Raw_Materials (raw_material_id[int],quantity[int])
+Employee (employee_id[int],employee_name[str],date[date])
+Finished_Products (artical_number[int],artical_name[str],production_date[date],best_before[date],batch_number[str],quantity[int],producing_employee[str],raw_material[blob],special_feature[str])
+Delivered_Products (artical_number[int],artical_name[str],production_date[date],best_before[date],batch_number[str],quantity[int],producing_employee[str],raw_material[blob],special_feature[str])

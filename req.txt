@@ -1,0 +1,40 @@
+I would like an individual offer for: a Windows program (Windows 11), it is supposed to be a kind of warehouse 
+management program. I would like to have it created privately to get a better standing at my workplace. 
+
+The input factors should be "article number", "article name" (if you don't know the article number, you have to do a 
+full-text search based on the article name), "Production date" (European format "DD.MM.YY", ideally automatically the 
+current date but can also be changed manually), "Best before date" ("production date" + 364 days), "Batch number" 
+(C "production date" + first number of the article number), Producing employee (ideally as a drop-down field with 
+all employees, which can be created, changed and deleted in any way), "Customer number" (for which customer the product
+
+ was produced), "Special feature" (text field, for example shape color or other) Once you have made the above-mentioned
+ entries, an inventory should be created, which you can see and edit in another tab (book and print outputs or correct
+ incorrect entries). 
+
+Using the database described, I need to be able to display for each employee which employee produced
+ how much of each item or item group for a manually defined time. In the background, an inventory should be booked down 
+from the raw materials/initial products used. Example: a car is being produced, for which I need the body, 4 tires, windows
+, seats and so on. These may need to be freely definable in a separate tab. I need to be able to adjust the inventory
+ manually when I buy a product from the supplier. If possible, it should also work for multiple users as I move forward,
+ should I be able to establish it. Basically, I would really like programming in Python (but it's just a whoosh, not a must),
+ since I started learning this programming language at the same time. There would be enough time until Christmas,
+ but at the latest by Friday December 29th, 2023, so that I can work with it from January 1st, 2024.
+
+ Maybe you have already implemented a similar project and can make me a good offer. 
+I would be very happy to get feedback at short notice so that if we can't implement it together,
+ I still have enough time to find someone who can implement it. Thanks in advance
+
+
+raw materials -> invenotory
+
+define products
+
+add product -> associated to employee , raw materials will be removed
+
+product will be added to finished product
+
+define customer
+
+deliver product to customer , product will be removed from finished product and added into delivered products
+
+
