@@ -32,6 +32,7 @@ class WarehouseDBHandler:
 
             self.db.execute('''CREATE TABLE IF NOT EXISTS Raw_Materials (
                                 raw_material_id INTEGER PRIMARY KEY,
+                                raw_material_name TEXT,
                                 quantity INTEGER
                             );''')
 
@@ -42,7 +43,8 @@ class WarehouseDBHandler:
                             );''')
 
             self.db.execute('''CREATE TABLE IF NOT EXISTS Finished_Products (
-                                artical_number INTEGER PRIMARY KEY,
+                                finished_product_id INTEGER PRIMARY KEY,
+                                artical_number INTEGER,
                                 artical_name TEXT,
                                 production_date TEXT,
                                 best_before TEXT,
@@ -119,12 +121,13 @@ class WarehouseDBHandler:
         
     def insert_defined_product(self, product_name, raw_materials):
         try:
+            raw_material_blob = bytes(json.dumps([raw_materials]),'utf-8')
             self.db.execute("INSERT INTO Defined_Products (product_name, raw_materials) VALUES (?, ?)",
-                            (product_name, raw_materials))
+                            (product_name, raw_material_blob))
             self.db.commit()
             logger.info('Defined product record created successfully')
         except Exception as e:
-            logger.error(f'Error while creating defined product record: {e}')
+            logger.error(f'Error while creating defined product record: {str(e)}')
 
     def get_all_defined_products(self):
         try:
@@ -136,10 +139,51 @@ class WarehouseDBHandler:
             logger.error(f'Error while retrieving defined products: {e}')
             return None
 
+    def get_defined_products_blob(self,product_id):
+        try:
+            q = "SELECT raw_materials FROM Defined_Products WHERE product_id=?"
+            cursor = self.db.execute(q, (product_id))
+            defined_product_blob = cursor.fetchone()
+            cursor.close()
+            prev_data = json.loads(defined_product_blob.decode('utf-8'))            
+            return prev_data
+        except Exception as e:
+            logger.error(f'Error while retrieving defined products: {e}')
+            return None
+
+    def get_defined_products_ids(self):
+        try:
+            cursor = self.db.execute("SELECT product_id, product_name FROM Defined_Products")
+            products = cursor.fetchall()
+
+            resultant_list = [] # list having names and ids merged : ['Junaid Nazir:2']
+            if products:
+                for i in products:
+                    resultant_list.append(i[1]+f':{i[0]}')
+
+            cursor.close()
+            return resultant_list
+        except Exception as e:
+            logger.error(f'Error while retrieving defined products: {e}')
+            return None
+
+
     def update_defined_product(self, product_id, product_name, raw_materials):
         try:
             q = "UPDATE Defined_Products SET product_name=?, raw_materials=? WHERE product_id=?"
             self.db.execute(q, (product_name, raw_materials, product_id))
+            self.db.commit()
+            logger.info('Defined product record updated successfully')
+            return True
+        except Exception as e:
+            logger.error(f'Failed to update defined product record: {e}')
+            return False
+
+    def update_defined_product_blob(self,product_id,raw_materials):
+        try:
+            raw_material_blob = bytes(json.dumps([raw_materials]),'utf-8')
+            q = "UPDATE Defined_Products SET raw_materials=? WHERE product_id=?"
+            self.db.execute(q, (raw_material_blob, product_id))
             self.db.commit()
             logger.info('Defined product record updated successfully')
             return True
@@ -161,13 +205,13 @@ class WarehouseDBHandler:
     
     # Raw Materials CRUD
         
-    def insert_raw_material(self, quantity):
+    def insert_raw_material(self, raw_material_name, quantity):
         try:
-            self.db.execute("INSERT INTO Raw_Materials (quantity) VALUES (?)", (quantity,))
+            self.db.execute("INSERT INTO Raw_Materials (raw_material_name, quantity) VALUES (?,?)", (raw_material_name,quantity,))
             self.db.commit()
             logger.info('Raw material record created successfully')
         except Exception as e:
-            logger.error(f'Error while creating raw material record: {e}')
+            logger.error(f'Error while creating raw material record: {str(e)}')
 
     def get_all_raw_materials(self):
         try:
@@ -179,6 +223,22 @@ class WarehouseDBHandler:
             logger.error(f'Error while retrieving raw materials: {e}')
             return None
 
+    def get_all_raw_materials_ids(self):
+        try:
+            cursor = self.db.execute("SELECT raw_material_id , raw_material_name FROM Raw_Materials")
+            raw_materials = cursor.fetchall()
+
+            resultant_list = [] # list having names and ids merged : ['Junaid Nazir:2']
+            if raw_materials:
+                for i in raw_materials:
+                    resultant_list.append(i[1]+f':{i[0]}')
+
+            cursor.close()
+            return resultant_list
+        except Exception as e:
+            logger.error(f'Error while retrieving raw materials: {e}')
+            return None
+        
     def update_raw_material(self, raw_material_id, quantity):
         try:
             q = "UPDATE Raw_Materials SET quantity=? WHERE raw_material_id=?"
@@ -247,10 +307,10 @@ class WarehouseDBHandler:
 
     # Finished_Products CRUD
         
-    def insert_finished_product(self, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
+    def insert_finished_product(self, artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
         try:
-            self.db.execute("INSERT INTO Finished_Products (artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            (artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature))
+            self.db.execute("INSERT INTO Finished_Products (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature))
             self.db.commit()
             logger.info('Finished product record created successfully')
         except Exception as e:
