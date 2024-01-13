@@ -458,7 +458,8 @@ class Ui_MainWindow(object):
                 self.date_add_employee_tab5.setStyleSheet("background-color:white;")
                 self.date_add_employee_tab5.setObjectName("date_add_employee_tab5")
                 self.horizontalLayout_23.addWidget(self.date_add_employee_tab5, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
-                self.add_employee_button_tab5 = QtWidgets.QPushButton(self.tab_3)
+                
+                self.add_employee_button_tab5 = QtWidgets.QPushButton(self.tab_3, clicked = lambda : self.add_employee_button_tab5_clicked())
                 font = QtGui.QFont()
                 font.setPointSize(12)
                 self.add_employee_button_tab5.setFont(font)
@@ -627,6 +628,8 @@ class Ui_MainWindow(object):
                 # startup code 
                 self.__defined_product_table_settings()
                 self.__raw_materials_table_settings()
+                self.__employee_table_settings()
+                self.__finished_products_table_settings()
 
                 # vars 
                 self.current_selected_raw_material_row = None
@@ -634,14 +637,18 @@ class Ui_MainWindow(object):
 
                 self.db_instance = db.WarehouseDBHandler()
                 
-                # Raw Materials tables and combos filling
+                # tables and combos filling
                 self.__fill_raw_materials_table()
                 self.__fill_raw_materials_combos()
 
                 self.__fill_defined_product_table()
                 self.__fill_defined_product_combos()
 
-                
+                self.__fill_employee_table()
+                self.__fill_employee_combos()
+
+                self.__fill_finished_products_combos()
+                self.__fill_finished_products_table()
 
         def retranslateUi(self, MainWindow):
                 _translate = QtCore.QCoreApplication.translate
@@ -725,7 +732,7 @@ class Ui_MainWindow(object):
                 defined_products_lists = self.db_instance.get_defined_products_ids()
 
                 if defined_products_lists:
-                        print(defined_products_lists)
+                        # print(defined_products_lists)
                         self.product_combo_tab3.clear()
                         self.product_combo_tab1.clear()
 
@@ -743,20 +750,77 @@ class Ui_MainWindow(object):
                         self.__raw_materials_table_settings()
                         
                         for row_index, row_data in enumerate(defined_products_lists):                                
-                                self.define_product_tableWidget_tab3.insertRow(row_index)
-                                for column_index, cell_data in enumerate(row_data):
-                                        if column_index == 2:
-                                                cell_data = cell_data.decode('utf-8')                                                
-                                                print(cell_data)
-                                                item = QtWidgets.QTableWidgetItem(cell_data)
-                                                # item = QtWidgets.QTableWidgetItem(str(cell_data[0]).replace('{','').replace('}',''))
-                                                self.define_product_tableWidget_tab3.setItem(row_index, column_index, item)
-                                        else:
-                                                item = QtWidgets.QTableWidgetItem(cell_data)
-                                                self.define_product_tableWidget_tab3.setItem(row_index, column_index, item)
+                                self.define_product_tableWidget_tab3.insertRow(row_index)                                
+                                for column_index, cell_data in enumerate(row_data):                                        
+                                        if isinstance(cell_data,bytes):
+                                                cell_data = cell_data.decode('utf-8')                                        
+                                        item = QtWidgets.QTableWidgetItem(str(cell_data))
+                                        self.define_product_tableWidget_tab3.setItem(row_index, column_index, item)
 
-
+        # Initial Employee Functions
+        def __employee_table_settings(self):
+                self.employees_tableWidget_tab5.setColumnCount(3)
+                column_names = ['Employee ID','Name','Joining Date']
+                self.employees_tableWidget_tab5.setHorizontalHeaderLabels(column_names)
+                self.employees_tableWidget_tab5.verticalHeader().setVisible(False)
         
+        def __fill_employee_combos(self):
+                employee_list = self.db_instance.get_all_employee_ids()
+
+                if employee_list:
+                        self.producing_employee_combo_tab1.clear()
+                        self.employee_name_combo_tab5.clear()
+
+                        employee_list.insert(0,'')
+
+                        self.producing_employee_combo_tab1.addItems(employee_list)
+                        self.employee_name_combo_tab5.addItems(employee_list)
+
+        def __fill_employee_table(self):
+                employee_data = self.db_instance.get_all_employees()
+
+                if employee_data:                                                                        
+                        self.employees_tableWidget_tab5.setRowCount(0)
+                        self.__employee_table_settings()
+                        
+                        for row_index, row_data in enumerate(employee_data):                                
+                                self.employees_tableWidget_tab5.insertRow(row_index)                                
+                                for column_index, cell_data in enumerate(row_data):                                        
+                                        item = QtWidgets.QTableWidgetItem(str(cell_data))
+                                        self.employees_tableWidget_tab5.setItem(row_index, column_index, item)
+
+
+        # Initial Product tab 1 Functions
+        def __finished_products_table_settings(self):
+                self.finished_products_tableWidget_tab6.setColumnCount(3)
+                column_names = ['Artical Number','Artical Name','Production Data','Best Before','Batch Number','Quantity','Producing Employee','Product','Special Features']
+                self.finished_products_tableWidget_tab6.setHorizontalHeaderLabels(column_names)
+                self.finished_products_tableWidget_tab6.verticalHeader().setVisible(False)
+
+        def __fill_finished_products_combos(self):
+                product_list = self.db_instance.get_all_finished_products_ids()
+
+                if product_list:
+                        self.product_combo_tab6.clear()
+
+                        product_list.insert(0,'')
+
+                        self.product_combo_tab6.addItems(product_list)
+        
+        def __fill_finished_products_table(self):
+                finished_products = self.db_instance.get_all_finished_products_ids()
+
+                if finished_products:
+                        self.finished_products_tableWidget_tab6.setRowCount(0)
+                        self.__finished_products_table_settings()
+                        
+                        for row_index, row_data in enumerate(finished_products):                                
+                                self.finished_products_tableWidget_tab6.insertRow(row_index)                                
+                                for column_index, cell_data in enumerate(row_data):                                        
+                                        item = QtWidgets.QTableWidgetItem(str(cell_data))
+                                        self.finished_products_tableWidget_tab6.setItem(row_index, column_index, item)
+
+
         # Raw Materials Tab 4 Clicked Functions
         def add_raw_material_clicked_tab4(self):
                 if self.name_tab4.text() == '' or self.quantity_tab4.text() == '':
@@ -808,8 +872,7 @@ class Ui_MainWindow(object):
                         self.__fill_defined_product_table()
                         self.__fill_defined_product_combos()
                         QMessageBox.information(None,'SUCCESS','Product added!')
-
-        # was here
+        
         def add_raw_material_button_clicked_tab3(self):
                 if self.product_combo_tab3.currentText() == '' or self.raw_material_combo_tab3.currentText() == '' or self.quantity_lineEdit_tab3.text() == '':
                         QMessageBox.information(None,'ERROR','Fill all the fields!')                                                
@@ -833,7 +896,39 @@ class Ui_MainWindow(object):
                         QMessageBox.information(None,'SUCCESS','Raw Materials Updated!')
 
 
-        # Finish Products
+
+        def add_product_clicked_tab3(self):
+                if self.name_lineEdit_tab3.text() == '':
+                        QMessageBox.information(None,'ERROR','Name field is empty!')
+
+                else:
+                        query = self.db_instance.insert_defined_product(self.name_lineEdit_tab3.text(),'')
+
+                        if query:
+                                self.name_lineEdit_tab3.clear()
+                                QMessageBox.information(None,'SUCCESS','Product added successfully!')
+                        else:
+                                QMessageBox.information(None,'FAILURE','Product could not be added!')
+
+
+        # Employee Tab 5
+        def add_employee_button_tab5_clicked(self):
+                if self.employee_name_tab5.text() == '':
+                        QMessageBox.information(None,'ERROR','Name field is empty!')
+                else:                        
+                        query = self.db_instance.insert_employee(self.employee_name_tab5.text(),self.date_add_employee_tab5.text())
+                        
+                        if query:
+                                self.employee_name_tab5.clear()
+
+                                self.__fill_employee_combos()
+                                self.__fill_employee_table()
+                                QMessageBox.information(None,'SUCCESS','Employee added successfully!')
+                        else:
+                                QMessageBox.information(None,'FAILURE','Employee could not be added!')
+
+
+        # Add Product Tab 1 clicked Functions
         def add_product_button_clicked_tab1(self): 
                 if self.artical_name_lineEdit_tab1.text() == '' or self.artical_number_lineEdit_tab1.text() == '' or \
                         self.production_date_tab1.text() == '' or self.best_before_date_tab1.text() == '' or \
@@ -844,23 +939,33 @@ class Ui_MainWindow(object):
                 else:
                        # get raw material against the product 
                        # self.product_combo_tab1.currentText()
-                       self.db_instance.insert_finished_product(self.artical_number_lineEdit_tab1.text(),self.artical_name_lineEdit_tab1.text(),
-                                                                self.production_date_tab1.text() , self.best_before_date_tab1.text(), self.batch_number_lineEdit_tab1.text(),
-                                                                self.quantity_lineEdit_tab1.text() , )
+                        query = self.db_instance.insert_finished_product(self.artical_number_lineEdit_tab1.text(),self.artical_name_lineEdit_tab1.text(),
+                                                                self.production_date_tab1.text() , self.best_before_date_tab1.text(), 
+                                                                self.batch_number_lineEdit_tab1.text(), self.quantity_lineEdit_tab1.text(),
+                                                                self.producing_employee_combo_tab1.currentText(),self.product_combo_tab1.currentText(),
+                                                                self.special_features_lineEdit_tab1.text())
+                       
+                        if query:
+                                self.artical_number_lineEdit_tab1.clear()
+                                self.artical_name_lineEdit_tab1.clear()
+                                self.production_date_tab1.clear()
+                                self.best_before_date_tab1.clear()
+                                self.producing_employee_combo_tab1.clear()
+                                self.product_combo_tab1.clear()
+                                self.special_features_lineEdit_tab1.clear()
+
+                                self.__fill_finished_products_combos()
+                                self.__fill_finished_products_table()
+                                QMessageBox.information(None,'SUCCESS','Employee added successfully!')
+                        
+                        else:
+                                QMessageBox.information(None,'FAILURE','Employee could not be added!')
 
 
-        def add_product_clicked_tab3(self):
-                if self.name_lineEdit_tab3.text() == '':
-                        QMessageBox.information(None,'ERROR','Name field is empty!')
 
-                else:
-                        self.db_instance.insert_defined_product(self.name_lineEdit_tab3.text(),'')
+                       
 
-                        self.name_lineEdit_tab3.clear()
-                        QMessageBox.information(None,'SUCCESS','Product added successfully!')
-
-
-
+        
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

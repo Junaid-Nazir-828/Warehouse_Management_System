@@ -126,14 +126,16 @@ class WarehouseDBHandler:
                             (product_name, raw_material_blob))
             self.db.commit()
             logger.info('Defined product record created successfully')
+            return True
         except Exception as e:
             logger.error(f'Error while creating defined product record: {str(e)}')
+            return False
 
     def get_all_defined_products(self):
         try:
             cursor = self.db.execute("SELECT * FROM Defined_Products")
             defined_products = cursor.fetchall()
-        
+            # print(defined_products)
             cursor.close()
             return defined_products
         except Exception as e:
@@ -148,7 +150,7 @@ class WarehouseDBHandler:
             
             cursor.close()
             prev_data = json.loads(defined_product_blob[0].decode('utf-8'))
-            print(prev_data)
+            # print(prev_data)
             return prev_data
         except Exception as e:
             logger.error(f'Error while retrieving defined products: {e}')
@@ -272,8 +274,10 @@ class WarehouseDBHandler:
                             (employee_name, date))
             self.db.commit()
             logger.info('Employee record created successfully')
+            return True
         except Exception as e:
             logger.error(f'Error while creating employee record: {e}')
+            return False
 
     def get_all_employees(self):
         try:
@@ -285,6 +289,22 @@ class WarehouseDBHandler:
             logger.error(f'Error while retrieving employees: {e}')
             return None
 
+    def get_all_employee_ids(self):
+        try:
+            cursor = self.db.execute("SELECT employee_id , employee_name FROM Employee")
+            employees = cursor.fetchall()
+
+            resultant_list = [] # list having names and ids merged : ['Junaid Nazir:2']
+            if employees:
+                for i in employees:
+                    resultant_list.append(i[1]+f':{i[0]}')
+
+            cursor.close()
+            return resultant_list
+        except Exception as e:
+            logger.error(f'Error while retrieving raw materials: {e}')
+            return None
+        
     def update_employee(self, employee_id, employee_name, date):
         try:
             q = "UPDATE Employee SET employee_name=?, date=? WHERE employee_id=?"
@@ -316,8 +336,10 @@ class WarehouseDBHandler:
                             (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature))
             self.db.commit()
             logger.info('Finished product record created successfully')
+            return True
         except Exception as e:
             logger.error(f'Error while creating finished product record: {e}')
+            return False
 
     def get_all_finished_products(self):
         try:
@@ -327,6 +349,22 @@ class WarehouseDBHandler:
             return finished_products
         except Exception as e:
             logger.error(f'Error while retrieving finished products: {e}')
+            return None
+
+    def get_all_finished_products_ids(self):
+        try:
+            cursor = self.db.execute("SELECT finished_product_id , artical_number FROM Finished_Products")
+            products = cursor.fetchall()
+
+            resultant_list = [] # list having names and ids merged : ['Junaid Nazir:2']
+            if products:
+                for i in products:
+                    resultant_list.append(i[1]+f':{i[0]}')
+
+            cursor.close()
+            return resultant_list
+        except Exception as e:
+            logger.error(f'Error while retrieving raw materials: {e}')
             return None
 
     def update_finished_product(self, artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
