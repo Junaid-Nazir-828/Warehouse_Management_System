@@ -328,7 +328,7 @@ class Ui_MainWindow(object):
                 self.quantity_lineEdit_tab3.setStyleSheet("background-color:white;")
                 self.quantity_lineEdit_tab3.setObjectName("quantity_lineEdit_tab3")
                 self.horizontalLayout_21.addWidget(self.quantity_lineEdit_tab3, 0, QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
-                self.add_raw_material_button_tab3 = QtWidgets.QPushButton(self.tab_4)
+                self.add_raw_material_button_tab3 = QtWidgets.QPushButton(self.tab_4,clicked = lambda : self.add_raw_material_button_clicked_tab3())
                 font = QtGui.QFont()
                 font.setPointSize(12)
                 self.add_raw_material_button_tab3.setFont(font)
@@ -697,8 +697,7 @@ class Ui_MainWindow(object):
 
         def __fill_raw_materials_combos(self):                
                 raw_materials_list = self.db_instance.get_all_raw_materials_ids()                
-                if raw_materials_list:
-                        print(raw_materials_list)
+                if raw_materials_list:                        
                         self.raw_material_combo_tab3.clear()
                         raw_materials_list.insert(0,'')
                         self.raw_material_combo_tab3.addItems(raw_materials_list)
@@ -746,8 +745,15 @@ class Ui_MainWindow(object):
                         for row_index, row_data in enumerate(defined_products_lists):                                
                                 self.define_product_tableWidget_tab3.insertRow(row_index)
                                 for column_index, cell_data in enumerate(row_data):
-                                        item = QtWidgets.QTableWidgetItem(str(cell_data))
-                                        self.define_product_tableWidget_tab3.setItem(row_index, column_index, item)
+                                        if column_index == 2:
+                                                cell_data = cell_data.decode('utf-8')                                                
+                                                print(cell_data)
+                                                item = QtWidgets.QTableWidgetItem(cell_data)
+                                                # item = QtWidgets.QTableWidgetItem(str(cell_data[0]).replace('{','').replace('}',''))
+                                                self.define_product_tableWidget_tab3.setItem(row_index, column_index, item)
+                                        else:
+                                                item = QtWidgets.QTableWidgetItem(cell_data)
+                                                self.define_product_tableWidget_tab3.setItem(row_index, column_index, item)
 
 
         
@@ -804,14 +810,27 @@ class Ui_MainWindow(object):
                         QMessageBox.information(None,'SUCCESS','Product added!')
 
         # was here
-        def add_raw_material_button_tab3(self):
+        def add_raw_material_button_clicked_tab3(self):
                 if self.product_combo_tab3.currentText() == '' or self.raw_material_combo_tab3.currentText() == '' or self.quantity_lineEdit_tab3.text() == '':
                         QMessageBox.information(None,'ERROR','Fill all the fields!')                                                
 
                 else:
-                        product_id = self.product_combo_tab3.currentText().split(':')[1]
-                        print(product_id)
-                        # self.db_instance.get
+                        product_id = int(self.product_combo_tab3.currentText().split(':')[1])                        
+                        raw_material = self.raw_material_combo_tab3.currentText().split(':')[0]
+                        raw_materials = self.db_instance.get_defined_products_blob(product_id)                        
+                        if raw_material in raw_materials[0]:
+                                raw_materials[0][raw_material] += int(self.quantity_lineEdit_tab3.text())
+                        else:
+                                raw_materials[0][raw_material] = int(self.quantity_lineEdit_tab3.text())
+
+                        self.db_instance.update_defined_product_blob(product_id,raw_materials)
+                                                
+                        self.product_combo_tab3.setCurrentIndex(0)
+                        self.raw_material_combo_tab3.setCurrentIndex(0)
+                        self.quantity_lineEdit_tab3.clear()
+
+                        self.__fill_defined_product_table()
+                        QMessageBox.information(None,'SUCCESS','Raw Materials Updated!')
 
 
         # Finish Products

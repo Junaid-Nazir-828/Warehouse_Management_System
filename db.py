@@ -133,6 +133,7 @@ class WarehouseDBHandler:
         try:
             cursor = self.db.execute("SELECT * FROM Defined_Products")
             defined_products = cursor.fetchall()
+        
             cursor.close()
             return defined_products
         except Exception as e:
@@ -142,10 +143,12 @@ class WarehouseDBHandler:
     def get_defined_products_blob(self,product_id):
         try:
             q = "SELECT raw_materials FROM Defined_Products WHERE product_id=?"
-            cursor = self.db.execute(q, (product_id))
+            cursor = self.db.execute(q, (product_id,))
             defined_product_blob = cursor.fetchone()
+            
             cursor.close()
-            prev_data = json.loads(defined_product_blob.decode('utf-8'))            
+            prev_data = json.loads(defined_product_blob[0].decode('utf-8'))
+            print(prev_data)
             return prev_data
         except Exception as e:
             logger.error(f'Error while retrieving defined products: {e}')
@@ -181,7 +184,7 @@ class WarehouseDBHandler:
 
     def update_defined_product_blob(self,product_id,raw_materials):
         try:
-            raw_material_blob = bytes(json.dumps([raw_materials]),'utf-8')
+            raw_material_blob = bytes(json.dumps(raw_materials),'utf-8')
             q = "UPDATE Defined_Products SET raw_materials=? WHERE product_id=?"
             self.db.execute(q, (raw_material_blob, product_id))
             self.db.commit()

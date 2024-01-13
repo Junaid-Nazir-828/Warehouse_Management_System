@@ -1,2 +1,2 @@
-a =['abc 1:1']
-a.insert(0,'')
+a = [{"key":2}]
+print(str(a[0]).replace('{','').replace('}',''))
