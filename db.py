@@ -332,7 +332,7 @@ class WarehouseDBHandler:
         
     def insert_finished_product(self, artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
         try:
-            self.db.execute("INSERT INTO Finished_Products (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            self.db.execute("INSERT INTO Finished_Products (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                             (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature))
             self.db.commit()
             logger.info('Finished product record created successfully')
@@ -353,13 +353,13 @@ class WarehouseDBHandler:
 
     def get_all_finished_products_ids(self):
         try:
-            cursor = self.db.execute("SELECT finished_product_id , artical_number FROM Finished_Products")
+            cursor = self.db.execute("SELECT finished_product_id , artical_name FROM Finished_Products")
             products = cursor.fetchall()
 
             resultant_list = [] # list having names and ids merged : ['Junaid Nazir:2']
             if products:
                 for i in products:
-                    resultant_list.append(i[1]+f':{i[0]}')
+                    resultant_list.append(i[1] + f':{i[0]}')
 
             cursor.close()
             return resultant_list

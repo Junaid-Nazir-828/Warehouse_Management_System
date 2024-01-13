@@ -192,7 +192,8 @@ class Ui_MainWindow(object):
                 self.verticalLayout.addLayout(self.horizontalLayout_2)
                 self.horizontalLayout = QtWidgets.QHBoxLayout()
                 self.horizontalLayout.setObjectName("horizontalLayout")
-                self.add_product_button_tab1 = QtWidgets.QPushButton(self.tab)
+
+                self.add_product_button_tab1 = QtWidgets.QPushButton(self.tab, clicked = lambda : self.add_product_button_clicked_tab1())
                 font = QtGui.QFont()
                 font.setFamily("Myanmar Text")
                 font.setPointSize(12)
@@ -792,8 +793,8 @@ class Ui_MainWindow(object):
 
         # Initial Product tab 1 Functions
         def __finished_products_table_settings(self):
-                self.finished_products_tableWidget_tab6.setColumnCount(3)
-                column_names = ['Artical Number','Artical Name','Production Data','Best Before','Batch Number','Quantity','Producing Employee','Product','Special Features']
+                self.finished_products_tableWidget_tab6.setColumnCount(10)
+                column_names = ['Product ID','Artical Number','Artical Name','Production Data','Best Before','Batch Number','Quantity','Producing Employee','Product','Special Features']
                 self.finished_products_tableWidget_tab6.setHorizontalHeaderLabels(column_names)
                 self.finished_products_tableWidget_tab6.verticalHeader().setVisible(False)
 
@@ -808,7 +809,7 @@ class Ui_MainWindow(object):
                         self.product_combo_tab6.addItems(product_list)
         
         def __fill_finished_products_table(self):
-                finished_products = self.db_instance.get_all_finished_products_ids()
+                finished_products = self.db_instance.get_all_finished_products()
 
                 if finished_products:
                         self.finished_products_tableWidget_tab6.setRowCount(0)
@@ -865,14 +866,18 @@ class Ui_MainWindow(object):
                         QMessageBox.information(None,'ERROR','Fill all the fields!')                                                
 
                 else:
-                        self.db_instance.insert_defined_product(self.name_lineEdit_tab3.text(),{})
+                        query = self.db_instance.insert_defined_product(self.name_lineEdit_tab3.text(),{})
 
-                        self.name_lineEdit_tab3.clear()
-                        
-                        self.__fill_defined_product_table()
-                        self.__fill_defined_product_combos()
-                        QMessageBox.information(None,'SUCCESS','Product added!')
-        
+                        if query:
+                                self.name_lineEdit_tab3.clear()
+                                
+                                self.__fill_defined_product_table()
+                                self.__fill_defined_product_combos()
+                                QMessageBox.information(None,'SUCCESS','Product added successfully!')
+                        else:
+                                QMessageBox.information(None,'FAILURE','Product could not added!')
+
+
         def add_raw_material_button_clicked_tab3(self):
                 if self.product_combo_tab3.currentText() == '' or self.raw_material_combo_tab3.currentText() == '' or self.quantity_lineEdit_tab3.text() == '':
                         QMessageBox.information(None,'ERROR','Fill all the fields!')                                                
@@ -942,7 +947,7 @@ class Ui_MainWindow(object):
                         query = self.db_instance.insert_finished_product(self.artical_number_lineEdit_tab1.text(),self.artical_name_lineEdit_tab1.text(),
                                                                 self.production_date_tab1.text() , self.best_before_date_tab1.text(), 
                                                                 self.batch_number_lineEdit_tab1.text(), self.quantity_lineEdit_tab1.text(),
-                                                                self.producing_employee_combo_tab1.currentText(),self.product_combo_tab1.currentText(),
+                                                                self.producing_employee_combo_tab1.currentText().split(':')[0],self.product_combo_tab1.currentText().split(':')[0],
                                                                 self.special_features_lineEdit_tab1.text())
                        
                         if query:
@@ -960,12 +965,9 @@ class Ui_MainWindow(object):
                         
                         else:
                                 QMessageBox.information(None,'FAILURE','Employee could not be added!')
-
-
-
                        
 
-        
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
