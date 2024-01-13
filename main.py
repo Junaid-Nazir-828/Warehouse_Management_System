@@ -940,7 +940,8 @@ class Ui_MainWindow(object):
                         self.batch_number_lineEdit_tab1.text() == '' or self.quantity_lineEdit_tab1.text() == '' or \
                         self.producing_employee_combo_tab1.currentText() == '' or self.product_combo_tab1.currentText() == '':
                        
-                       print("Error")
+                        QMessageBox.information(None,'FAILURE','Fill all the fields first!')
+
                 else:
                        # get raw material against the product 
                        # self.product_combo_tab1.currentText()
@@ -952,11 +953,9 @@ class Ui_MainWindow(object):
                        
                         if query:
                                 self.artical_number_lineEdit_tab1.clear()
-                                self.artical_name_lineEdit_tab1.clear()
-                                self.production_date_tab1.clear()
-                                self.best_before_date_tab1.clear()
-                                self.producing_employee_combo_tab1.clear()
-                                self.product_combo_tab1.clear()
+                                self.artical_name_lineEdit_tab1.clear()                         
+                                self.batch_number_lineEdit_tab1.clear()                                       
+                                self.quantity_lineEdit_tab1.clear()
                                 self.special_features_lineEdit_tab1.clear()
 
                                 self.__fill_finished_products_combos()
