@@ -96,6 +96,23 @@ class WarehouseDBHandler:
             logger.error(f'Error while retrieving customers: {e}')
             return None
 
+    def get_customer_ids(self):
+        try:
+            cursor = self.db.execute("SELECT customer_id, customer_name FROM Customer")
+            customers = cursor.fetchall()
+
+            resultant_list = []  # list having names and ids merged: ['John Doe:1']
+            if customers:
+                for customer in customers:
+                    resultant_list.append(customer[1]+f':{customer[0]}')
+
+            cursor.close()
+            return resultant_list
+        except Exception as e:
+            logger.error(f'Error while retrieving customer records: {e}')
+            return None
+    
+
     def update_customer(self, customer_id, customer_name, date):
         try:
             q = "UPDATE Customer SET customer_name=?, date=? WHERE customer_id=?"

@@ -238,7 +238,8 @@ class Ui_MainWindow(object):
         "padding:2px 0px;")
                 self.date_tab2.setObjectName("date_tab2")
                 self.horizontalLayout_20.addWidget(self.date_tab2, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
-                self.add_customer_button_tab2 = QtWidgets.QPushButton(self.tab_2)
+                
+                self.add_customer_button_tab2 = QtWidgets.QPushButton(self.tab_2 , clicked = lambda : self.add_customer_button_tab2_clicked())
                 font = QtGui.QFont()
                 font.setPointSize(12)
                 self.add_customer_button_tab2.setFont(font)
@@ -631,6 +632,7 @@ class Ui_MainWindow(object):
                 self.__raw_materials_table_settings()
                 self.__employee_table_settings()
                 self.__finished_products_table_settings()
+                self.__customer_table_settings()
 
                 # vars 
                 self.current_selected_raw_material_row = None
@@ -648,8 +650,11 @@ class Ui_MainWindow(object):
                 self.__fill_employee_table()
                 self.__fill_employee_combos()
 
-                self.__fill_finished_products_combos()
                 self.__fill_finished_products_table()
+                self.__fill_finished_products_combos()
+
+                self.__fill_customer_table()
+                self.__fill_customer_combos()
 
         def retranslateUi(self, MainWindow):
                 _translate = QtCore.QCoreApplication.translate
@@ -711,8 +716,7 @@ class Ui_MainWindow(object):
                         self.raw_material_combo_tab3.addItems(raw_materials_list)
 
         def __fill_raw_materials_table(self):                
-                raw_materials_list = self.db_instance.get_all_raw_materials()
-                print(raw_materials_list)
+                raw_materials_list = self.db_instance.get_all_raw_materials()                
                 if raw_materials_list:                                                                        
                         self.raw_material_tableWidget_tab4.setRowCount(0)
                         self.__raw_materials_table_settings()
@@ -822,6 +826,36 @@ class Ui_MainWindow(object):
                                         item = QtWidgets.QTableWidgetItem(str(cell_data))
                                         self.finished_products_tableWidget_tab6.setItem(row_index, column_index, item)
 
+
+        # Initial Customer Functions
+        def __customer_table_settings(self):
+                self.customer_tableWidget_tab2.setColumnCount(3)
+                column_names = ['Customer ID','Name','Date Added']
+                self.customer_tableWidget_tab2.setHorizontalHeaderLabels(column_names)
+                self.customer_tableWidget_tab2.verticalHeader().setVisible(False)
+
+        def __fill_customer_combos(self):
+                customer_list = self.db_instance.get_customer_ids()
+
+                if customer_list:
+                        self.customer_combo_tab6.clear()
+
+                        customer_list.insert(0,'')
+
+                        self.customer_combo_tab6.addItems(customer_list)
+
+        def __fill_customer_table(self):
+                customers = self.db_instance.get_all_customers()
+
+                if customers:
+                        self.customer_tableWidget_tab2.setRowCount(0)
+                        self.__customer_table_settings()
+                        
+                        for row_index, row_data in enumerate(customers):                                
+                                self.customer_tableWidget_tab2.insertRow(row_index)                                
+                                for column_index, cell_data in enumerate(row_data):                                        
+                                        item = QtWidgets.QTableWidgetItem(str(cell_data))
+                                        self.customer_tableWidget_tab2.setItem(row_index, column_index, item)
 
         # Raw Materials Tab 4 Clicked Functions
         def add_raw_material_clicked_tab4(self):
@@ -979,6 +1013,8 @@ class Ui_MainWindow(object):
                                                 self.batch_number_lineEdit_tab1.clear()                                       
                                                 self.quantity_lineEdit_tab1.clear()
                                                 self.special_features_lineEdit_tab1.clear()
+                                                self.product_combo_tab1.setCurrentIndex(0)
+                                                self.producing_employee_combo_tab1.setCurrentIndex(0)                                                
 
                                                 self.__fill_finished_products_combos()
                                                 self.__fill_finished_products_table()
@@ -999,7 +1035,13 @@ class Ui_MainWindow(object):
                 else:
                         query = self.db_instance.insert_customer(self.name_lineEdit_tab2.text(),self.date_tab2.text())
                         if query:
-                                
+                                self.name_lineEdit_tab2.clear()
+
+                                self.__fill_customer_table()
+                                self.__fill_customer_combos()                              
+                                QMessageBox.information(None,'SUCCESS','Customer added successfully!')
+
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
