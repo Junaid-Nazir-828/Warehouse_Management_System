@@ -81,8 +81,10 @@ class WarehouseDBHandler:
                             (customer_name, date))
             self.db.commit()
             logger.info('Customer record created successfully')
+            return True
         except Exception as e:
             logger.error(f'Error while creating customer record: {e}')
+            return False
 
     def get_all_customers(self):
         try:
@@ -244,6 +246,24 @@ class WarehouseDBHandler:
             logger.error(f'Error while retrieving raw materials: {e}')
             return None
         
+    def get_raw_material_by_name(self, name):
+        try:
+            cursor = self.db.execute("SELECT raw_material_id, raw_material_name, quantity FROM Raw_Materials WHERE raw_material_name = ?", (name,))
+            raw_material = cursor.fetchone()
+
+            if raw_material:
+                # Construct a dictionary with raw material information
+                raw_material_info = {'id': raw_material[0], 'name': raw_material[1], 'quantity':raw_material[2]}
+                return raw_material_info
+            else:
+                # Return None if the raw material with the specified name is not found
+                return None
+        except Exception as e:
+            logger.error(f'Error while retrieving raw material by name: {e}')
+            return None
+        finally:
+            cursor.close()
+
     def update_raw_material(self, raw_material_id, quantity):
         try:
             q = "UPDATE Raw_Materials SET quantity=? WHERE raw_material_id=?"

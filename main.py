@@ -712,6 +712,7 @@ class Ui_MainWindow(object):
 
         def __fill_raw_materials_table(self):                
                 raw_materials_list = self.db_instance.get_all_raw_materials()
+                print(raw_materials_list)
                 if raw_materials_list:                                                                        
                         self.raw_material_tableWidget_tab4.setRowCount(0)
                         self.__raw_materials_table_settings()
@@ -943,30 +944,62 @@ class Ui_MainWindow(object):
                         QMessageBox.information(None,'FAILURE','Fill all the fields first!')
 
                 else:
-                       # get raw material against the product 
-                       # self.product_combo_tab1.currentText()
-                        query = self.db_instance.insert_finished_product(self.artical_number_lineEdit_tab1.text(),self.artical_name_lineEdit_tab1.text(),
-                                                                self.production_date_tab1.text() , self.best_before_date_tab1.text(), 
-                                                                self.batch_number_lineEdit_tab1.text(), self.quantity_lineEdit_tab1.text(),
-                                                                self.producing_employee_combo_tab1.currentText().split(':')[0],self.product_combo_tab1.currentText().split(':')[0],
-                                                                self.special_features_lineEdit_tab1.text())
-                       
-                        if query:
-                                self.artical_number_lineEdit_tab1.clear()
-                                self.artical_name_lineEdit_tab1.clear()                         
-                                self.batch_number_lineEdit_tab1.clear()                                       
-                                self.quantity_lineEdit_tab1.clear()
-                                self.special_features_lineEdit_tab1.clear()
+                        try:
+                        # get raw material against the product 
+                                defined_products_raw_material = self.db_instance.get_defined_products_blob(int(self.product_combo_tab1.currentText().split(':')[1]))                                
+                                # [(1, 'tiles', 10), (2, 'cement', 5), (3, 'files', 80), (4, 'Junaid', 20), (6, 'filess', 1), (8, 'hadi', 49), (9, 'garments', 20)]
+                                
+                                not_enough_raw_material = False
+                                updated_raw_materials = {}
 
-                                self.__fill_finished_products_combos()
-                                self.__fill_finished_products_table()
-                                QMessageBox.information(None,'SUCCESS','Employee added successfully!')
+                                for i in defined_products_raw_material[0]:                                        
+                                        inventory_raw_material = self.db_instance.get_raw_material_by_name(i)                                        
+                                        if inventory_raw_material and inventory_raw_material['quantity'] >= int(defined_products_raw_material[0][i]) * int(self.quantity_lineEdit_tab1.text()):
+                                                updated_raw_materials[inventory_raw_material["id"]] = inventory_raw_material['quantity'] - int(defined_products_raw_material[0][i]) * int(self.quantity_lineEdit_tab1.text())
+                                        else:
+                                                not_enough_raw_material = True
+                                                break
+
+                                if not_enough_raw_material:
+                                        QMessageBox.information(None,'FAILURE','Not enough raw material!')
+
+                                else:                                        
+                                        query = self.db_instance.insert_finished_product(self.artical_number_lineEdit_tab1.text(),self.artical_name_lineEdit_tab1.text(),
+                                                                                self.production_date_tab1.text() , self.best_before_date_tab1.text(), 
+                                                                                self.batch_number_lineEdit_tab1.text(), self.quantity_lineEdit_tab1.text(),
+                                                                                self.producing_employee_combo_tab1.currentText().split(':')[0],self.product_combo_tab1.currentText().split(':')[0],
+                                                                                self.special_features_lineEdit_tab1.text())
+                                
+                                        if query:
+                                                for i in updated_raw_materials:
+                                                        self.db_instance.update_raw_material(i,updated_raw_materials[i])                                                
+                                                
+                                                self.artical_number_lineEdit_tab1.clear()
+                                                self.artical_name_lineEdit_tab1.clear()                         
+                                                self.batch_number_lineEdit_tab1.clear()                                       
+                                                self.quantity_lineEdit_tab1.clear()
+                                                self.special_features_lineEdit_tab1.clear()
+
+                                                self.__fill_finished_products_combos()
+                                                self.__fill_finished_products_table()
+                                                self.__fill_raw_materials_table()
+                                                QMessageBox.information(None,'SUCCESS','Employee added successfully!')
+                                        
+                                        else:
+                                                QMessageBox.information(None,'FAILURE','Employee could not be added!')
                         
-                        else:
-                                QMessageBox.information(None,'FAILURE','Employee could not be added!')
-                       
+                        except Exception as e:                       
+                                print(f'ERROR - {str(e)}')
 
 
+        # Customer Tab 2 Clicked Functions
+        def add_customer_button_tab2_clicked(self):
+                if self.name_lineEdit_tab2.text() == '':
+                        pass
+                else:
+                        query = self.db_instance.insert_customer(self.name_lineEdit_tab2.text(),self.date_tab2.text())
+                        if query:
+                                
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
