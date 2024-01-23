@@ -51,20 +51,14 @@ class WarehouseDBHandler:
                                 batch_number TEXT,
                                 quantity INTEGER,
                                 producing_employee TEXT,
-                                raw_material BLOB,
+                                product TEXT,                                
                                 special_feature TEXT
                             );''')
 
             self.db.execute('''CREATE TABLE IF NOT EXISTS Delivered_Products (
-                                artical_number INTEGER PRIMARY KEY,
-                                artical_name TEXT,
-                                production_date TEXT,
-                                best_before TEXT,
-                                batch_number TEXT,
-                                quantity INTEGER,
-                                producing_employee TEXT,
-                                raw_material BLOB,
-                                special_feature TEXT
+                                delivered_product_id INTEGER PRIMARY KEY,
+                                finished_product_id INTEGER,                                
+                                customer_name TEXT                              
                             );''')
 
             self.db.commit()
@@ -367,10 +361,10 @@ class WarehouseDBHandler:
 
     # Finished_Products CRUD
         
-    def insert_finished_product(self, artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
+    def insert_finished_product(self, artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, product, special_feature):
         try:
-            self.db.execute("INSERT INTO Finished_Products (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature))
+            self.db.execute("INSERT INTO Finished_Products (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, product, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, product, special_feature))
             self.db.commit()
             logger.info('Finished product record created successfully')
             return True
@@ -427,44 +421,29 @@ class WarehouseDBHandler:
             return False
     
     # Delivered_Products CRUD
-    def insert_delivered_product(self, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
+    def insert_delivered_product(self, finished_product_id, customer_name):
         try:
-            self.db.execute("INSERT INTO Delivered_Products (artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            (artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature))
+            self.db.execute('''INSERT INTO Delivered_Products (finished_product_id, customer_name)
+                            VALUES (?, ?)''', (finished_product_id, customer_name))
             self.db.commit()
             logger.info('Delivered product record created successfully')
+            return True
         except Exception as e:
             logger.error(f'Error while creating delivered product record: {e}')
-
-    def get_all_delivered_products(self):
-        try:
-            cursor = self.db.execute("SELECT * FROM Delivered_Products")
-            delivered_products = cursor.fetchall()
-            cursor.close()
-            return delivered_products
-        except Exception as e:
-            logger.error(f'Error while retrieving delivered products: {e}')
-            return None
-
-    def update_delivered_product(self, artical_number, artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature):
-        try:
-            q = "UPDATE Delivered_Products SET artical_name=?, production_date=?, best_before=?, batch_number=?, quantity=?, producing_employee=?, raw_material=?, special_feature=? WHERE artical_number=?"
-            self.db.execute(q, (artical_name, production_date, best_before, batch_number, quantity, producing_employee, raw_material, special_feature, artical_number))
-            self.db.commit()
-            logger.info('Delivered product record updated successfully')
-            return True
-        except Exception as e:
-            logger.error(f'Failed to update delivered product record: {e}')
             return False
 
-    def delete_delivered_product(self, artical_number):
+    def read_delivered_products(self):
         try:
-            q = "DELETE FROM Delivered_Products WHERE artical_number=?"
-            self.db.execute(q, (artical_number,))
-            self.db.commit()
-            logger.info('Delivered product record deleted successfully')
-            return True
+            query = self.db.execute('''SELECT * FROM Delivered_Products''')
+            return query.fetchall()
         except Exception as e:
-            logger.error(f'Failed to delete delivered product record: {e}')
-            return False
-    
+            logger.error(f'Error while reading delivered products: {e}')
+
+    def delete_delivered_product(self, delivered_id):
+        try:
+            self.db.execute('''DELETE FROM Delivered_Products
+                            WHERE delivered_product_id = ?''', (delivered_id,))
+            self.db.commit()
+            logger.info(f'Delivered product record with ID {delivered_id} deleted successfully')
+        except Exception as e:
+            logger.error(f'Error while deleting delivered product record: {e}')
