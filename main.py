@@ -1185,10 +1185,10 @@ class Ui_MainWindow(object):
                                                 self.__fill_finished_products_combos()
                                                 self.__fill_finished_products_table()
                                                 self.__fill_raw_materials_table()
-                                                QMessageBox.information(None,'SUCCESS','Employee added successfully!')
+                                                QMessageBox.information(None,'SUCCESS','Product added successfully!')
                                         
                                         else:
-                                                QMessageBox.information(None,'FAILURE','Employee could not be added!')
+                                                QMessageBox.information(None,'FAILURE','Product could not be added!')
                         
                         except Exception as e:                       
                                 print(f'ERROR - {str(e)}')
